@@ -1,0 +1,69 @@
+version: '3.3'
+
+services:
+   nginx-proxy:
+     image: jwilder/nginx-proxy
+     container_name: ${WEB_PROXY_CONTAINER_NAME}
+     ports:
+       - "80:80"
+       - "443:443"
+     volumes:
+       - /var/run/docker.sock:/tmp/docker.sock:ro
+       - /etc/nginx/certs:/etc/nginx/certs:ro 
+       - vhost.d:/etc/nginx/vhost.d
+       - html:/usr/share/nginx/html
+     restart: always
+     labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.docker_gen:
+
+   letsencrypt-nginx-proxy-companion:
+     depends_on:
+      - nginx-proxy
+     image: jrcs/letsencrypt-nginx-proxy-companion
+     container_name: ${LETSENCRYPT_CONTAINER_NAME}
+     volumes:
+      - /etc/nginx/certs:/etc/nginx/certs:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+     restart: unless-stopped
+     environment:
+       NGINX_PROXY_CONTAINER: ${WEB_PROXY_CONTAINER_NAME}
+ 
+   db:
+     image: mysql:5.7
+     container_name: ${WP_DB_CONTAINER_NAME}
+     volumes:
+       - /etc/mysql/data:/var/lib/mysql
+       - ${WP_IMPORT_SQL_IMPORT_FILE}
+     restart: unless-stopped
+     environment:
+       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+       MYSQL_DATABASE: ${MYSQL_DATABASE}
+       MYSQL_USER: ${MYSQL_USER}
+       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+   wordpress:
+     depends_on:
+       - db 
+     image: wordpress:latest
+     container_name: ${WORDPRESS_CONTAINER_NAME}
+     restart: unless-stopped
+     expose:
+       - "80"
+     links:
+      - db:mysql
+     environment:
+       WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+       WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+       WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+       VIRTUAL_HOST: ${VIRTUAL_HOST}
+       LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
+       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+     volumes:
+       - ${WP_CONTENT_VOLUME}:/var/www/html/wp-content
+
+volumes:
+  vhost.d:
+  html:
