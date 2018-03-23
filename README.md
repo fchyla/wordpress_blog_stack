@@ -1,4 +1,4 @@
-Wordpress stack with docker with SSL using letsencrypt service with automatic certificate renewal.
+Wordpress stack with docker-compose with SSL using letsencrypt service with automatic certificate renewal.
 
 # Overview
 * [nginx-proxy](https://github.com/jwilder/nginx-proxy) as frontend proxy
