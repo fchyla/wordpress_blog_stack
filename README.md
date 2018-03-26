@@ -1,5 +1,7 @@
 Wordpress stack with docker-compose with SSL using letsencrypt service with automatic certificate renewal.
 
+![alt-text](https://github.com/fchyla/wordpress_blog_stack/raw/master/wordpress-docker-stack.png "HLD")
+
 # Overview
 * [nginx-proxy](https://github.com/jwilder/nginx-proxy) as frontend proxy
 * [docker-letsencrypt-nginx-proxy-companion](https://github.com/JrCs/docker-letsencrypt-nginx-proxy-companion) used to generate and update SSL certificates and config files for nginx-proxy
